@@ -186,7 +186,7 @@ include_once('./koneksi.php');
             <a href="berandaDokter.php?page=periksa" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Periksa</a>
           </li>
           <li>
-            <a href="berandaDokter.php?page=riwayatPasien" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Riwayat Pasien</a>
+            <a href="berandaDokter.php?page=riwayat" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Riwayat Pasien</a>
           </li>
         </ul>
     </div>
