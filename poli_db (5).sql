@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 06, 2024 at 05:42 AM
+-- Generation Time: Jan 27, 2024 at 06:01 AM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 8.2.0
 
@@ -48,7 +48,8 @@ INSERT INTO `daftar_poli` (`id`, `id_pasien`, `id_jadwal`, `keluhan`, `no_antria
 (6, 1, 2, 'Mencret', 4, '2023-12-29 19:15:22'),
 (7, 1, 2, 'Mencret', 5, '2023-12-29 19:17:35'),
 (8, 1, 2, 'Batuk', 6, '2023-12-29 19:18:15'),
-(9, 8, 1, 'Demam', 2, '2023-12-31 04:19:05');
+(9, 8, 1, 'Demam', 2, '2023-12-31 04:19:05'),
+(10, 1, 2, 'Batuk', 7, '2024-01-24 03:21:08');
 
 -- --------------------------------------------------------
 
@@ -120,9 +121,10 @@ CREATE TABLE `jadwal_periksa` (
 --
 
 INSERT INTO `jadwal_periksa` (`id`, `id_dokter`, `hari`, `jam_mulai`, `jam_selesai`, `status_jadwal`) VALUES
-(1, 1, 'Senin', '08:00:00', '16:00:00', 'N'),
-(2, 1, 'Selasa', '08:00:00', '16:00:00', 'Y'),
-(3, 1, 'Rabu', '08:00:00', '16:00:00', 'N');
+(1, 1, 'Senin', '08:00:00', '17:04:00', '0'),
+(2, 1, 'Selasa', '14:00:00', '16:00:00', '1'),
+(4, 1, 'Senin', '00:50:00', '15:53:00', '1'),
+(6, 1, 'Senin', '11:30:00', '11:32:00', '1');
 
 -- --------------------------------------------------------
 
@@ -325,7 +327,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `daftar_poli`
 --
 ALTER TABLE `daftar_poli`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `detail_periksa`
@@ -343,7 +345,7 @@ ALTER TABLE `dokter`
 -- AUTO_INCREMENT for table `jadwal_periksa`
 --
 ALTER TABLE `jadwal_periksa`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `obat`
