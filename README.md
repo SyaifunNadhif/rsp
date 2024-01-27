@@ -81,3 +81,6 @@ console.log(mobilSaya.getInfo()); // Output: Warna: Biru, Laliopo: 100
 
 mobilSaya.tambahLaliopo(50); // Output: Laliopo mobil bertambah menjadi 150
 console.log(mobilSaya.getInfo()); // Output: Warna: Biru, Laliopo: 150
+
+![image](https://github.com/SyaifunNadhif/rsp/assets/88659346/f126dd71-239f-45f9-b49b-3f7b80ca1988)
+
