@@ -1,114 +1,108 @@
-<?php
-if (!isset($_SESSION)) {
-    session_start();
-}
-
-if (isset($_POST['simpanData'])) {
-    $valid_days = ["Senin", "Selasa", "Rabu", "Kamis", "Jum'at", "Sabtu"];
-    $id_dokter = $_SESSION['id'];
-    $hari = $_POST['hari'];
-    $jam_mulai = $_POST['jam_mulai'];
-    $jam_selesai = $_POST['jam_selesai'];
-    $status_jadwal = isset($_POST['status_jadwal']) ? $_POST['status_jadwal'] : 0;
-
-    if (!in_array($hari, $valid_days)) {
-        echo "<script> 
-            alert('Invalid day value.');
-            document.location='berandaDokter.php?page=aturJadwalDokter';
-        </script>";
-        exit;
+<?php 
+    if (!isset($_SESSION)) {
+        session_start();
     }
+    // if (!isset($_SESSION['nip'])) {
+    //     // Jika pengguna sudah login, tampilkan tombol "Logout"
+    //     header("Location: berandaDokter.php?page=loginDokter");
+    //     exit;
+    // }
 
-    if (isset($_POST['id'])) {
-        $id = $_POST['id'];
-        $stmt = $mysqli->prepare("UPDATE jadwal_periksa SET id_dokter=?, hari=?, jam_mulai=?, jam_selesai=?, status_jadwal=? WHERE id=?");
-        $stmt->bind_param("isssii", $id_dokter, $hari, $jam_mulai, $jam_selesai, $status_jadwal, $id);
+    if (isset($_POST['simpanData'])) {
+        $valid_days = ["Senin", "Selasa", "Rabu", "Kamis", "Jum'at", "Sabtu"];
+        $id_dokter = $_SESSION['id'];
+        
+        // Check if the 'hari' value is valid
+        
 
-        if ($stmt->execute()) {
-            // Disable other schedules on the same day if the current schedule is active
-            if ($status_jadwal == 0) {
-                disableOtherSchedulesOnSameDay($id_dokter, $hari, $id);
+        if (isset($_POST['id'])) {
+            $status_jadwal = isset($_POST['status_jadwal']) ? $_POST['status_jadwal'] : 0;
+            if($status_jadwal == '1'){
+                // ubah semua data menjadi tidak aktif
+                // UPDATE jadwal_periksa SET status_jadwal= '0' WHERE id_dokter = 1;
+                $stmt = $mysqli->prepare("UPDATE jadwal_periksa SET status_jadwal = '0' WHERE id_dokter = ?");
+                $stmt->bind_param("s", $id_dokter);
+                $stmt->execute();
+                $stmt->close();
             }
 
-            echo "
-                <script> 
-                    alert('Berhasil mengubah data.');
-                    document.location='berandaDokter.php?page=aturJadwalDokter';
-                </script>
-            ";
-        } else {
-            // Handle error
-        }
+            $id = $_POST['id'];
+            $stmt = $mysqli->prepare("UPDATE jadwal_periksa SET status_jadwal=? WHERE id=?");
+            $stmt->bind_param("si", $status_jadwal, $id);
 
-        $stmt->close();
-    } else {
-        $stmt = $mysqli->prepare("INSERT INTO jadwal_periksa (id_dokter, hari, jam_mulai, jam_selesai, status_jadwal) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("isssi", $id_dokter, $hari, $jam_mulai, $jam_selesai, $status_jadwal);
-
-        if ($stmt->execute()) {
-            // Disable other schedules on the same day if the current schedule is active
-            if ($status_jadwal == 0) {
-                disableOtherSchedulesOnSameDay($id_dokter, $hari, $stmt->insert_id);
+            if ($stmt->execute()) {
+                echo "
+                    <script> 
+                        alert('Berhasil mengubah data.');
+                        document.location='berandaDokter.php?page=aturJadwalDokter';
+                    </script>
+                ";
+            } else {
+                // Handle error
             }
 
-            echo "
-                <script> 
-                    alert('Berhasil menambah data.');
-                    document.location='berandaDokter.php?page=aturJadwalDokter';
-                </script>
-            ";
+            $stmt->close();
         } else {
-            // Handle error
-        }
-
-        $stmt->close();
-    }
-}
-
-if (isset($_GET['aksi'])) {
-    if ($_GET['aksi'] == 'hapus') {
-        $stmt = $mysqli->prepare("DELETE FROM jadwal_periksa WHERE id = ?");
-        $stmt->bind_param("i", $_GET['id']);
-
-        if ($stmt->execute()) {
-            echo "
-                <script> 
-                    alert('Berhasil menghapus data.');
+            $hari = $_POST['hari'];
+            $jam_mulai = $_POST['jam_mulai'];
+            $jam_selesai = $_POST['jam_selesai'];
+            $status_jadwal = isset($_POST['status_jadwal']) ? $_POST['status_jadwal'] : 0;
+            if (!in_array($hari, $valid_days)) {
+                echo "<script> 
+                    alert('Invalid day value.');
                     document.location='berandaDokter.php?page=aturJadwalDokter';
-                </script>
-            ";
-        } else {
-            echo "
-                <script> 
-                    alert('Gagal menghapus data: " . mysqli_error($mysqli) . "');
-                    document.location='berandaDokter.php?page=aturJadwalDokter';
-                </script>
-            ";
+                </script>";
+                exit;
+            }
+            
+            $stmt = $mysqli->prepare("INSERT INTO jadwal_periksa (id_dokter, hari, jam_mulai, jam_selesai, status_jadwal) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("isssi", $id_dokter, $hari, $jam_mulai, $jam_selesai, $status_jadwal);
+
+            if ($stmt->execute()) {
+                echo "
+                    <script> 
+                        alert('Berhasil menambah data.');
+                        document.location='berandaDokter.php?page=aturJadwalDokter';
+                    </script>
+                ";
+            } else {
+                // Handle error
+            }
+
+            $stmt->close();
         }
-
-        $stmt->close();
     }
-}
 
-function disableOtherSchedulesOnSameDay($id_dokter, $hari, $currentScheduleId) {
-    global $mysqli;
+    if (isset($_GET['aksi'])) {
+        if ($_GET['aksi'] == 'hapus') {
+            $stmt = $mysqli->prepare("DELETE FROM jadwal_periksa WHERE id = ?");
+            $stmt->bind_param("i", $_GET['id']);
 
-    // Nonaktifkan semua jadwal pada hari yang sama, kecuali yang sedang diupdate
-    $stmt = $mysqli->prepare("UPDATE jadwal_periksa SET status_jadwal = CASE WHEN id = ? THEN 0 ELSE 1 END WHERE id_dokter = ? AND hari = ?");
-    $stmt->bind_param("iis", $currentScheduleId, $id_dokter, $hari);
-    $stmt->execute();
-    $stmt->close();
-}
+            if ($stmt->execute()) {
+                echo "
+                    <script> 
+                        alert('Berhasil menghapus data.');
+                        document.location='berandaDokter.php?page=aturJadwalDokter';
+                    </script>
+                ";
+            } else {
+                echo "
+                    <script> 
+                        alert('Gagal menghapus data: " . mysqli_error($mysqli) . "');
+                        document.location='berandaDokter.php?page=aturJadwalDokter';
+                    </script>
+                ";
+            }
+
+            $stmt->close();
+        }
+    }
 ?>
-<!-- ... Bagian HTML yang sudah ada ... -->
-
-<!-- ... Bagian HTML yang sudah ada ... -->
-
 
 <main id="aturJadwalDokter-page">
     <div class="container" style="margin-top: 5.5rem;">
         <div class="row justify-content-center">
-            <h2 class="ps-0 text-center">Jadwal Praktik Saya</h2>
+            <!-- <h2 class="ps-0 text-center">Jadwal Praktik Saya</h2> -->
             <!-- <div class="d-flex justify-content-end pe-0">
                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#tambahDokter">
                     <i class="fa-regular fa-plus"></i> Tambah
@@ -161,10 +155,10 @@ function disableOtherSchedulesOnSameDay($id_dokter, $hari, $currentScheduleId) {
                             <div class="col-lg-6">
                                 <div class="dropdown mb-3">
                                     <label for="hari">Hari <span class="text-danger">*</span></label>
-                                    <select class="form-select" name="hari" aria-label="hari">
+                                    <select class="form-select" name="hari" aria-label="hari" <?=isset($_GET['aksi']) && $_GET['aksi'] == 'edit' ? 'disabled' : '' ?> >
                                         <option value="" selected>Pilih Hari...</option>
                                         <?php
-                                            $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                                            $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', "Jum'at", 'Sabtu'];
                                             foreach ($days as $day) {
                                                 $selected = ($day == $hari) ? 'selected' : '';
                                                 echo "<option value='$day' $selected>$day</option>";
@@ -174,10 +168,10 @@ function disableOtherSchedulesOnSameDay($id_dokter, $hari, $currentScheduleId) {
                                 </div>
                                 <div class="dropdown mb-3">
                                     <label for="status_jadwal">Status Jadwal <span class="text-danger">*</span></label>
-                                    <select class="form-select" name="status_jadwal" aria-label="status_jadwal">
+                                    <select class="form-select" name="status_jadwal" aria-label="status_jadwal" >
                                         <option value="" selected>Pilih Status...</option>
                                         <?php
-                                            $statuses = ['0' => 'Aktif', '1' => 'Nonaktif'];
+                                            $statuses = ['0' => 'Tidak Aktif', '1' => 'Aktif'];
                                             foreach ($statuses as $status => $statusName) {
                                                 $selected = ($status == $status_jadwal) ? 'selected' : '';
                                                 echo "<option value='$status' $selected>$statusName</option>";
@@ -189,17 +183,17 @@ function disableOtherSchedulesOnSameDay($id_dokter, $hari, $currentScheduleId) {
                             <div class="col-lg-6">
                                 <div class="mb-3">
                                     <label for="jam_mulai">Jam Mulai <span class="text-danger">*</span></label>
-                                    <input type="time" name="jam_mulai" class="form-control" required value="<?php echo $jam_mulai ?>">
+                                    <input type="time" name="jam_mulai" class="form-control" required value="<?php echo $jam_mulai ?>" <?=isset($_GET['aksi']) && $_GET['aksi'] == 'edit' ? 'disabled' : '' ?> >
                                 </div>
                                 <div class="mb-3">
                                     <label for="jam_selesai">Jam Selesai <span class="text-danger">*</span></label>
-                                    <input type="time" name="jam_selesai" class="form-control" required value="<?php echo $jam_selesai ?>">
+                                    <input type="time" name="jam_selesai" class="form-control" required value="<?php echo $jam_selesai ?>" <?=isset($_GET['aksi']) && $_GET['aksi'] == 'edit' ? 'disabled' : '' ?> >
                                 </div>
                             </div>
                         </div>
                         
                         <div class="d-flex justify-content-end mt-2">
-                            <button type="submit" name="simpanData" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 font-bold">Simpan</button>
+                            <button type="submit" name="simpanData" class="bg-blue-600 hover:bg-blue-700 px-10 py-2 font-bold text-white rounded-md">Simpan</button>
                         </div>
         
                     </form>
@@ -240,19 +234,19 @@ function disableOtherSchedulesOnSameDay($id_dokter, $hari, $currentScheduleId) {
                                     <td><?php echo $data['jam_selesai'] ?> WIB</td>
                                     <td>
                                         <?php 
-                                            echo ($data['status_jadwal'] == 0) 
+                                            echo ($data['status_jadwal'] == 1) 
                                             ? '<span class="bg-success badge text-white border rounded px-4 py-2 mb-0">Aktif</span>' 
                                             : '<span class="bg-danger badge text-white border rounded px-3 py-2 mb-0">Nonaktif</span>'; 
                                         ?>
                                     </td>
                                     <td>
-                                        <a class="btn btn-sm btn-warning text-white btn-edit" href="berandaDokter.php?page=aturJadwalDokter&id=<?php echo $data['id'] ?>">
+                                        <a class="btn btn-sm btn-warning text-white btn-edit" href="berandaDokter.php?page=aturJadwalDokter&id=<?php echo $data['id'] ?>&aksi=edit">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
                                     </td>
                                     <td>
                                         <a href="berandaDokter.php?page=aturJadwalDokter&id=<?php echo $data['id'] ?>&aksi=hapus" class="btn btn-sm btn-danger text-white">
-                                            <i class="fa-solid fa-trash"></i>
+                                            <i class="fa-solid fa-trash"></i> 
                                         </a>
                                     </td>
                                 </tr>
@@ -273,5 +267,5 @@ function disableOtherSchedulesOnSameDay($id_dokter, $hari, $currentScheduleId) {
             // console.log('test');
             dropdownStatus.disabled = false;
         });
-    </script> -->
+    </script> -->
 </main>
