@@ -4,21 +4,30 @@ if (!isset($_SESSION)) {
 }
 
 if (isset($_POST['simpanData'])) {
+    $valid_days = ["Senin", "Selasa", "Rabu", "Kamis", "Jum'at", "Sabtu"];
     $id_dokter = $_SESSION['id'];
+    $hari = $_POST['hari'];
     $jam_mulai = $_POST['jam_mulai'];
     $jam_selesai = $_POST['jam_selesai'];
     $status_jadwal = isset($_POST['status_jadwal']) ? $_POST['status_jadwal'] : 0;
 
+    if (!in_array($hari, $valid_days)) {
+        echo "<script> 
+            alert('Invalid day value.');
+            document.location='berandaDokter.php?page=aturJadwalDokter';
+        </script>";
+        exit;
+    }
+
     if (isset($_POST['id'])) {
         $id = $_POST['id'];
-        $stmt = $mysqli->prepare("UPDATE jadwal_periksa SET id_dokter=?, jam_mulai=?, jam_selesai=?, status_jadwal=? WHERE id=?");
-        $stmt->bind_param("isssi", $id_dokter, $jam_mulai, $jam_selesai, $status_jadwal, $id);
+        $stmt = $mysqli->prepare("UPDATE jadwal_periksa SET id_dokter=?, hari=?, jam_mulai=?, jam_selesai=?, status_jadwal=? WHERE id=?");
+        $stmt->bind_param("isssii", $id_dokter, $hari, $jam_mulai, $jam_selesai, $status_jadwal, $id);
 
         if ($stmt->execute()) {
-            // Enable the current schedule and disable all other schedules
+            // Disable other schedules on the same day if the current schedule is active
             if ($status_jadwal == 0) {
-                enableCurrentSchedule($id_dokter, $id);
-                disableOtherSchedules($id_dokter, $id);
+                disableOtherSchedulesOnSameDay($id_dokter, $hari, $id);
             }
 
             echo "
@@ -33,14 +42,13 @@ if (isset($_POST['simpanData'])) {
 
         $stmt->close();
     } else {
-        $stmt = $mysqli->prepare("INSERT INTO jadwal_periksa (id_dokter, jam_mulai, jam_selesai, status_jadwal) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("isss", $id_dokter, $jam_mulai, $jam_selesai, $status_jadwal);
+        $stmt = $mysqli->prepare("INSERT INTO jadwal_periksa (id_dokter, hari, jam_mulai, jam_selesai, status_jadwal) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("isssi", $id_dokter, $hari, $jam_mulai, $jam_selesai, $status_jadwal);
 
         if ($stmt->execute()) {
-            // Enable the current schedule and disable all other schedules
+            // Disable other schedules on the same day if the current schedule is active
             if ($status_jadwal == 0) {
-                enableCurrentSchedule($id_dokter, $stmt->insert_id);
-                disableOtherSchedules($id_dokter, $stmt->insert_id);
+                disableOtherSchedulesOnSameDay($id_dokter, $hari, $stmt->insert_id);
             }
 
             echo "
@@ -82,28 +90,19 @@ if (isset($_GET['aksi'])) {
     }
 }
 
-function enableCurrentSchedule($id_dokter, $currentScheduleId) {
+function disableOtherSchedulesOnSameDay($id_dokter, $hari, $currentScheduleId) {
     global $mysqli;
 
-    // Enable the current schedule
-    $stmt = $mysqli->prepare("UPDATE jadwal_periksa SET status_jadwal = 0 WHERE id_dokter = ? AND id = ?");
-    $stmt->bind_param("ii", $id_dokter, $currentScheduleId);
-    $stmt->execute();
-    $stmt->close();
-}
-
-function disableOtherSchedules($id_dokter, $currentScheduleId) {
-    global $mysqli;
-
-    // Disable all other schedules
-    $stmt = $mysqli->prepare("UPDATE jadwal_periksa SET status_jadwal = 1 WHERE id_dokter = ? AND id != ?");
-    $stmt->bind_param("ii", $id_dokter, $currentScheduleId);
+    // Nonaktifkan semua jadwal pada hari yang sama, kecuali yang sedang diupdate
+    $stmt = $mysqli->prepare("UPDATE jadwal_periksa SET status_jadwal = CASE WHEN id = ? THEN 0 ELSE 1 END WHERE id_dokter = ? AND hari = ?");
+    $stmt->bind_param("iis", $currentScheduleId, $id_dokter, $hari);
     $stmt->execute();
     $stmt->close();
 }
 ?>
 <!-- ... Bagian HTML yang sudah ada ... -->
 
+<!-- ... Bagian HTML yang sudah ada ... -->
 
 
 <main id="aturJadwalDokter-page">
@@ -200,7 +199,7 @@ function disableOtherSchedules($id_dokter, $currentScheduleId) {
                         </div>
                         
                         <div class="d-flex justify-content-end mt-2">
-                            <button type="submit" name="simpanData" class="btn btn-primary">Simpan</button>
+                            <button type="submit" name="simpanData" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 font-bold">Simpan</button>
                         </div>
         
                     </form>
