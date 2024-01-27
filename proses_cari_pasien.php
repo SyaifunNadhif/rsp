@@ -16,9 +16,6 @@ if (isset($_GET['id_pasien'])) {
 
         // Tampilkan data pasien dalam modal
         echo '<p>Nama: ' . $row['nama'] . '</p>' .
-             '<p>Alamat: ' . $row['alamat'] . '</p>' .
-             '<p>No. KTP: ' . $row['no_ktp'] . '</p>' .
-             '<p>No. HP: ' . $row['no_hp'] . '</p>' .
              '<p>No. RM: ' . $row['no_rm'] . '</p>';
     } else {
         echo 'Tidak ditemukan data pasien';

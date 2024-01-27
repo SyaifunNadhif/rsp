@@ -29,10 +29,7 @@ if (isset($_POST['cari'])) {
                     
                     // Isi data pasien ke dalam modal
                     var modalContent = document.getElementById('modalContent');
-                    modalContent.innerHTML = '<p>Nama: ' + '".$row['nama']."' + '</p>' +
-                                             '<p>Alamat: ' + '".$row['alamat']."' + '</p>' +
-                                             '<p>No. KTP: ' + '".$row['no_ktp']."' + '</p>' +
-                                             '<p>No. HP: ' + '".$row['no_hp']."' + '</p>' +
+                    modalContent.innerHTML = '<p>Nama: ' + '".$row['nama']."' + '</p>' +                
                                              '<p>No. RM: ' + '".$row['no_rm']."' + '</p>';
                     
                     // Ketika pengguna menekan 'x', tutup modal

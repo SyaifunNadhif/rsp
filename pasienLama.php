@@ -94,9 +94,10 @@ if (isset($_POST['simpan'])) {
                     <select class="form-select px-3 py-3 border border-neutral-300 w-full rounded-md" name="id_jadwal" id="inputid_jadwal" required>
                         <?php
                         $resultJadwal = mysqli_query($mysqli, "SELECT jadwal.id, jadwal.hari, jadwal.jam_mulai, jadwal.jam_selesai, dokter.nama AS nama_dokter, poli.nama_poli
-                                                                FROM jadwal_periksa jadwal
-                                                                JOIN dokter ON jadwal.id_dokter = dokter.id
-                                                                JOIN poli ON dokter.id_poli = poli.id");
+                        FROM jadwal_periksa jadwal
+                        JOIN dokter ON jadwal.id_dokter = dokter.id
+                        JOIN poli ON dokter.id_poli = poli.id
+                        WHERE jadwal.status_jadwal = 'Y'");
                         while ($dataJadwal = mysqli_fetch_assoc($resultJadwal)) {
                             echo "<option value='" . $dataJadwal['id'] . "'>" . $dataJadwal['hari'] . " , " . $dataJadwal['jam_mulai'] . " - " . $dataJadwal['jam_selesai'] . " - Dr. " . $dataJadwal['nama_dokter'] . " - Poli " . $dataJadwal['nama_poli'] . "</option>";
                         }
